@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    volumes:
+      - ../modules/sql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MBDB_PASSWORD}
+  massbank-web:
+    build:
+      context: ../MassBank-Project
+      dockerfile: Dockerfile-web
+    restart: always
+    depends_on:
+      - mariadb
+    environment:
+      - JAVA_OPTS=-Xmx4g -Xms1g
+      - MB_NAME
+      - MB_LONG_NAME
+      - MB_BASE_URL
+      - MB_DATA_PATH_ROOT
+      - MBDB_NAME
+      - MBDB_HOST_NAME
+      - MBDB_PASSWORD
+
+    ports:
+      - 808${MB_TAG}:8080
+  massbank-openapi:
+    build:
+      context: ../MassBank-Project
+      dockerfile: Dockerfile-openapi
+    ports:
+      - 809${MB_TAG}:8080

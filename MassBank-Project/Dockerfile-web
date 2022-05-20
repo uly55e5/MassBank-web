@@ -1,0 +1,19 @@
+FROM maven:3.8-jdk-11 as build
+ADD ./MassBank-lib/pom.xml /build/MassBank-lib/pom.xml
+ADD ./MassBank-web/pom.xml /build/MassBank-web/pom.xml
+ADD ./MassBank-OpenAPI/pom.xml /build/MassBank-OpenAPI/pom.xml
+ADD ./pom.xml /build/pom.xml
+ADD ./.mvn/* /build/.mvn/
+WORKDIR /build/
+RUN mvn clean dependency:go-offline -pl MassBank-web -am --fail-never --settings ./.mvn/local-settings.xml
+
+COPY ./MassBank-web/src/ /build/MassBank-web/src/
+COPY ./MassBank-lib/src/ /build/MassBank-lib/src/
+RUN ls -l /build/MassBank-lib/
+RUN ls -l /build/MassBank-lib/src/
+RUN mvn -pl MassBank-web -am package --settings ./.mvn/local-settings.xml
+
+FROM tomee:8
+COPY --from=build /build/MassBank-web/target/MassBank.war /usr/local/tomee/webapps/MassBank.war
+COPY ./conf/massbank-env.conf /etc/massbank.conf
+EXPOSE 8080

@@ -5,7 +5,7 @@ COPY ./MassBank-web /build/MassBank-web/
 COPY ./pom.xml /build/
 COPY ./.mvn/* /build/.mvn/
 WORKDIR /build/
-RUN mvn verify -pl MassBank-OpenAPI --fail-never --settings ./.mvn/local-settings.xml
+RUN mvn clean dependency:copy-dependencies -pl MassBank-OpenAPI --fail-never --settings ./.mvn/local-settings.xml
 ADD ./MassBank-OpenAPI/ /build/MassBank-OpenAPI/
 RUN mvn package -pl MassBank-OpenAPI -am --settings ./.mvn/local-settings.xml
 
